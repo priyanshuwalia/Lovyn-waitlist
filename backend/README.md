@@ -1,15 +1,37 @@
-# lovyn-waitlist-backend
+# Lovyn Waitlist Backend
 
-To install dependencies:
+Express API for Lovyn waitlist submissions, confirmation email delivery, and admin participant access.
+
+## Setup
 
 ```bash
 bun install
+cp .env.example .env
+bun run prisma:generate
+bun --bunx prisma migrate deploy
 ```
 
-To run:
+Set the real values in `.env` before running the server. In production, `ADMIN_API_TOKEN`, `ADMIN_USER_ID`, `ADMIN_NAME`, `ADMIN_EMAIL`, `SMTP_HOST`, and `EMAIL_FROM` are required.
+
+## Run
 
 ```bash
-bun run index.ts
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.3.12. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+The API listens on `http://localhost:4000` by default.
+
+## Routes
+
+- `GET /health`
+- `POST /api/waitlist`
+- `GET /api/admin/waitlist-participants?page=1&pageSize=25`
+
+Admin routes require `Authorization: Bearer <ADMIN_API_TOKEN>`.
+
+## Verification
+
+```bash
+bun run typecheck
+bun --bunx prisma validate
+```

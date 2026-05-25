@@ -1,21 +1,27 @@
-# bun-react-tailwind-shadcn-template
+# Lovyn Waitlist UI
 
-To install dependencies:
+React landing page and waitlist form for Lovyn.
+
+## Setup
 
 ```bash
 bun install
+cp .env.example .env
 ```
 
-To start a development server:
+`BUN_PUBLIC_API_BASE_URL` should point at the backend API, for example `http://localhost:4000`.
+
+## Run
 
 ```bash
-bun dev
+bun run dev
 ```
 
-To run for production:
+The UI listens on `http://localhost:3000` by default.
+
+## Verification
 
 ```bash
-bun start
+bun --bunx tsc --noEmit
+bun run build
 ```
-
-This project was created using `bun init` in bun v1.3.12. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
