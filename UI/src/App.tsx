@@ -1,13 +1,9 @@
 import { AlertCircle, CheckCircle2, ChevronDown, LoaderCircle, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
+import { IntentionsPill, WaitlistActions, WhyLovyn } from "./components/landing";
 import "./index.css";
 import { seekingOptions, waitlistSubmissionSchema, type WaitlistSubmission } from "./waitlist-contract";
-
-type InfoBlock = {
-  title: string;
-  body: string;
-};
 
 type FieldErrors = Partial<Record<keyof WaitlistSubmission, string>>;
 
@@ -31,29 +27,6 @@ const navigationItems = [
   { label: "Features", href: "#features" },
   { label: "Our Philosophy", href: "#philosophy" },
   { label: "Community", href: "#community" },
-];
-
-const infoRows: InfoBlock[][] = [
-  [
-    {
-      title: "Who it is for",
-      body: "Lovyn is designed for individuals seeking quiet luxury in their connections. Those who value depth over volume, discretion over broadcasting, and intentionality over impulse.",
-    },
-    {
-      title: "Inclusive partnerships",
-      body: "We honor the diverse spectrum of human connection. Our platform structurally supports varied relationship models and identities with respect and nuance.",
-    },
-  ],
-  [
-    {
-      title: "Who it is for",
-      body: "Lovyn is designed for individuals seeking quiet luxury in their connections. Those who value depth over volume, discretion over broadcasting, and intentionality over impulse.",
-    },
-    {
-      title: "Inclusive partnerships",
-      body: "We honor the diverse spectrum of human connection. Our platform structurally supports varied relationship models and identities with respect and nuance.",
-    },
-  ],
 ];
 
 export function App() {
@@ -123,7 +96,7 @@ export function App() {
       <Header />
       <main>
         <Hero />
-        <InfoSections />
+        <WhyLovyn />
         <WaitlistSection
           fieldErrors={fieldErrors}
           isSubmitting={isSubmitting}
@@ -163,30 +136,18 @@ function Hero() {
   return (
     <section className="hero" id="community">
       <div className="hero__content">
+        <IntentionsPill className="" />
         <h1>
-          <span>Find the connection</span>
-          <span>that truly fits your life.</span>
+          <span>Find people for</span>
+          <span className="italic">intentional dating.</span>
         </h1>
-        <p>An intentional, privacy-first space designed for meaningful, inclusive relationships beyond the noise of traditional swiping.</p>
-        <a href="#waitlist">JOIN THE WAITLIST</a>
+        <p className="hero__para">A privacy-first relationship platform designed to connect people through shared intentions, values, and life goals, not endless swiping.</p>
+        <WaitlistActions
+          className="hero__actions"
+          primaryAction={{ label: "Join the Waitlist", href: "#waitlist" }}
+          secondaryAction={{ label: "Learn More", href: "#features" }}
+        />
       </div>
-    </section>
-  );
-}
-
-function InfoSections() {
-  return (
-    <section className="info-sections" aria-label="Lovyn overview">
-      {infoRows.map((row, rowIndex) => (
-        <div className="info-row" id={rowIndex === 0 ? "features" : "philosophy"} key={`row-${rowIndex}`}>
-          {row.map(block => (
-            <article className="info-block" key={`${rowIndex}-${block.title}`}>
-              <h2>{block.title}</h2>
-              <p>{block.body}</p>
-            </article>
-          ))}
-        </div>
-      ))}
     </section>
   );
 }
