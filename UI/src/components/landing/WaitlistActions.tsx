@@ -50,23 +50,23 @@ const defaultSecondaryAction: LovynAction = {
 const defaultAvatars: CommunityAvatar[] = [
   {
     alt: "Community member",
-    src: "https://i.pravatar.cc/96?img=12",
     fallback: "A",
+    background: "linear-gradient(135deg, #f6e5f7, #b86bb6)",
   },
   {
     alt: "Community member",
-    src: "https://i.pravatar.cc/96?img=32",
     fallback: "S",
+    background: "linear-gradient(135deg, #f8dce9, #d36f9d)",
   },
   {
     alt: "Community member",
-    src: "https://i.pravatar.cc/96?img=47",
     fallback: "M",
+    background: "linear-gradient(135deg, #eadbff, #9270d8)",
   },
   {
     alt: "Community member",
-    src: "https://i.pravatar.cc/96?img=68",
     fallback: "R",
+    background: "linear-gradient(135deg, #f6e5f7, #7f4a7c)",
   },
 ];
 
@@ -142,7 +142,12 @@ function ActionElement({
         aria-label={action.ariaLabel}
         className={className}
         href={action.href}
-        onClick={action.onClick}
+        onClick={event => {
+          if (action.onClick) {
+            event.preventDefault();
+            action.onClick();
+          }
+        }}
         rel={action.rel}
         target={action.target}
       >

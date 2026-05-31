@@ -1,4 +1,4 @@
-import { Brain, LockKeyhole, MessageCircle, UsersRound } from "lucide-react";
+import { LockKeyhole, MessageCircle, Scale, UsersRound } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -33,7 +33,7 @@ export const defaultWhyLovynFeatures: WhyLovynFeature[] = [
     description: "Your profile is private by default. You choose who sees you and what you share.",
   },
   {
-    icon: <Brain aria-hidden="true" strokeWidth={1.8} />,
+    icon: <Scale aria-hidden="true" strokeWidth={1.8} />,
     title: "Compatibility Matching",
     description: "We match you on values, lifestyle, and relationship goals, not just photos.",
   },
