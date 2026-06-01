@@ -1,5 +1,5 @@
 import { AlertCircle, CheckCircle2, ChevronDown, LoaderCircle, X } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import { IntentionsPill, WaitlistActions, WhyLovyn } from "./components/landing";
 import "./index.css";
@@ -28,6 +28,36 @@ const navigationItems = [
   { label: "Our Philosophy", href: "#philosophy" },
   { label: "Community", href: "#community" },
 ];
+
+const intentionOptions = [
+  "intentional dating",
+  "lavender marriage",
+  "commitment, not confusion",
+  "the same future as you",
+  "meaningful connection",
+] as const;
+
+function scrollToSectionCenter(href: string) {
+  const targetId = href.startsWith("#") ? href.slice(1) : href;
+  const section = document.getElementById(targetId);
+
+  if (!section) {
+    return;
+  }
+
+  const target =
+    targetId === "waitlist"
+      ? section.querySelector(".waitlist-form") ?? section
+      : targetId === "features"
+        ? section.querySelector(".why-lovyn__inner") ?? section
+        : section;
+
+  target.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+  window.history.pushState(null, "", `#${targetId}`);
+}
 
 export function App() {
   const [submissionMessage, setSubmissionMessage] = useState("");
@@ -119,12 +149,26 @@ function Header() {
         </a>
         <nav className="topbar__nav" aria-label="Primary navigation">
           {navigationItems.map(item => (
-            <a key={item.href} href={item.href}>
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={event => {
+                event.preventDefault();
+                scrollToSectionCenter(item.href);
+              }}
+            >
               {item.label}
             </a>
           ))}
         </nav>
-        <a className="topbar__button" href="#waitlist">
+        <a
+          className="topbar__button"
+          href="#waitlist"
+          onClick={event => {
+            event.preventDefault();
+            scrollToSectionCenter("#waitlist");
+          }}
+        >
           Join Waitlist
         </a>
       </div>
@@ -133,19 +177,64 @@ function Header() {
 }
 
 function Hero() {
+  const [activeIntentionIndex, setActiveIntentionIndex] = useState(0);
+  const [isDeletingIntention, setIsDeletingIntention] = useState(false);
+  const [typedIntention, setTypedIntention] = useState("");
+
+  useEffect(() => {
+    const currentIntention = intentionOptions[activeIntentionIndex] ?? intentionOptions[0];
+    const hasFullIntention = typedIntention === currentIntention;
+    const delay = hasFullIntention && !isDeletingIntention ? 1300 : isDeletingIntention ? 36 : 72;
+
+    const typingTimer = window.setTimeout(() => {
+      if (hasFullIntention && !isDeletingIntention) {
+        setIsDeletingIntention(true);
+        return;
+      }
+
+      if (isDeletingIntention) {
+        if (typedIntention.length > 0) {
+          setTypedIntention(currentValue => currentValue.slice(0, -1));
+          return;
+        }
+
+        setIsDeletingIntention(false);
+        setActiveIntentionIndex(currentIndex => (currentIndex + 1) % intentionOptions.length);
+        return;
+      }
+
+      setTypedIntention(currentIntention.slice(0, typedIntention.length + 1));
+    }, delay);
+
+    return () => window.clearTimeout(typingTimer);
+  }, [activeIntentionIndex, isDeletingIntention, typedIntention]);
+
   return (
     <section className="hero" id="community">
       <div className="hero__content">
         <IntentionsPill className="" />
         <h1>
           <span>Find people for</span>
-          <span className="italic">intentional dating.</span>
+          <span className="italic hero__dynamic-intention" aria-live="polite">
+            <span className="hero__typewriter">
+              <span className="hero__typed-text">{typedIntention ? `${typedIntention}.` : "\u00a0"}</span>
+              <span className="hero__type-cursor" aria-hidden="true" />
+            </span>
+          </span>
         </h1>
         <p className="hero__para">A privacy-first relationship platform designed to connect people through shared intentions, values, and life goals, not endless swiping.</p>
         <WaitlistActions
           className="hero__actions"
-          primaryAction={{ label: "Join the Waitlist", href: "#waitlist" }}
-          secondaryAction={{ label: "Learn More", href: "#features" }}
+          primaryAction={{
+            label: "Join the Waitlist",
+            href: "#waitlist",
+            onClick: () => scrollToSectionCenter("#waitlist"),
+          }}
+          secondaryAction={{
+            label: "Learn More",
+            href: "#features",
+            onClick: () => scrollToSectionCenter("#features"),
+          }}
         />
       </div>
     </section>
@@ -238,7 +327,7 @@ function WaitlistSection({ fieldErrors, isSubmitting, onSubmit, submissionMessag
             "SUBMIT REQUEST"
           )}
         </button>
-        <p className="conduct-note">By joining, you agree to our standard of respectful conduct.</p>
+        <p className="conduct-note">By joining, You agree to our standard of respectful conduct.</p>
         {submissionMessage ? (
           <p className="form-status" aria-live="polite">
             {submissionMessage}
@@ -277,7 +366,7 @@ function Footer() {
         <a className="footer__wordmark" href="/" aria-label="Lovyn home">
           Lovyn
         </a>
-        <p>Copyright 2024 Lovyn. Intentionally crafted for human connection.</p>
+        <p> ©2026 Lovyn. Intentionally crafted for human connection.</p>
         <nav className="footer__links" aria-label="Footer navigation">
           <a href="#privacy">Privacy</a>
           <a href="#terms">Terms</a>
