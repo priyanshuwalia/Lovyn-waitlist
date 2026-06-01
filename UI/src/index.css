@@ -4,7 +4,9 @@
   --topbar-height: 84px;
   --page-gutter: 24px;
   --content-width: 1080px;
-  --section-y: 64px;
+  --section-heading-gap: 28px;
+  --compact-section-y: 28px;
+  --section-y: 42px;
   --radius: 8px;
   --surface: #fbf9f9;
   --surface-card: #ffffff;
@@ -145,10 +147,9 @@ main {
 
 .hero {
   display: flex;
-  min-height: 560px;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 84px var(--page-gutter) 72px;
+  padding: 48px var(--page-gutter) 64px;
   background: var(--surface);
   text-align: center;
 }
@@ -166,7 +167,7 @@ main {
   max-width: 100%;
   align-items: center;
   gap: 12px;
-  margin-bottom: 22px;
+  margin-bottom: 8px;
   padding: 4px 18px 4px 4px;
   border: 1px solid #f0cfef;
   border-radius: 999px;
@@ -214,7 +215,7 @@ main {
 
 .hero__content h1 {
   max-width: 760px;
-  margin: 0 0 16px;
+  margin: 0 0 0px;
   color: #000000;
   font-size: clamp(42px, 4.2vw, 58px);
   font-weight: 700;
@@ -228,7 +229,7 @@ main {
 
 .hero__dynamic-intention {
   display: block;
-  min-height: 1.1em;
+  min-height: 65px;
   overflow: hidden;
   background: var(--surface);
   color: var(--lilac-strong);
@@ -257,7 +258,7 @@ main {
 
 .hero__para {
   max-width: 630px;
-  margin: 0 0 34px;
+  margin: 0 0 14px;
   color: var(--text-secondary);
   font-size: 18px;
   font-weight: 400;
@@ -319,7 +320,7 @@ main {
 }
 
 .lovyn-actions__primary {
-  min-width: min(244px, 100%);
+  min-width: min(200px, 100%);
   min-height: 56px;
   padding: 16px 30px;
   border-radius: var(--radius);
@@ -444,16 +445,17 @@ main {
 .why-lovyn__inner {
   width: min(var(--content-width), calc(100% - 48px));
   margin: 0 auto;
-  padding: var(--section-y) 0 72px;
+  padding: var(--compact-section-y) 0;
 }
 
 .why-lovyn__title {
-  margin: 0 0 24px;
+  margin: 0 0 var(--section-heading-gap);
   color: var(--text-primary);
   /* font-family: Georgia, "Times New Roman", serif; */
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 38.4px;
+  letter-spacing: -0.64px;
   text-align: center;
 }
 
@@ -461,6 +463,7 @@ main {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
+  margin-bottom: 28px;
 }
 
 .why-lovyn-card {
@@ -533,7 +536,7 @@ main {
   display: grid;
   width: min(var(--content-width), calc(100% - 48px));
   margin: 0 auto;
-  padding: 72px 0;
+  padding: var(--section-y) 0;
   grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.22fr);
   gap: 48px;
   align-items: center;
@@ -544,7 +547,7 @@ main {
 }
 
 .lovyn-story__copy h2 {
-  margin: 0 0 16px;
+  margin: 0 0 28px;
   color: var(--text-primary);
   /* font-family: Georgia, "Times New Roman", serif; */
   font-size: 32px;
@@ -588,14 +591,14 @@ main {
 }
 
 .waitlist {
-  padding: 72px var(--page-gutter) 80px;
+  padding: var(--compact-section-y) var(--page-gutter) 72px;
   border-top: 1px solid #e3e2e2;
   background: var(--surface);
   text-align: center;
 }
 
 .waitlist h1 {
-  margin: 0 0 28px;
+  margin: 0 0 var(--section-heading-gap);
   color: #000000;
   font-size: 32px;
   font-weight: 700;
@@ -923,7 +926,7 @@ main {
 
   .hero {
     min-height: auto;
-    padding: 64px 24px 56px;
+    padding: 52px 24px 56px;
   }
 
   .hero__content h1 {
@@ -976,6 +979,8 @@ main {
   :root {
     --topbar-height: 72px;
     --page-gutter: 20px;
+    --section-heading-gap: 24px;
+    --compact-section-y: 24px;
     --section-y: 48px;
   }
 
@@ -998,7 +1003,8 @@ main {
   }
 
   .hero {
-    padding: 52px var(--page-gutter) 48px;
+    min-height: auto;
+    padding: 48px var(--page-gutter) 56px;
   }
 
   .hero__content h1 {
@@ -1019,7 +1025,7 @@ main {
   }
 
   .waitlist {
-    padding: var(--section-y) var(--page-gutter) 56px;
+    padding: var(--compact-section-y) var(--page-gutter) 48px;
   }
 
   .waitlist h1 {
@@ -1113,12 +1119,13 @@ main {
   }
 
   .why-lovyn__inner {
-    padding: 44px 0 48px;
+    padding: var(--compact-section-y) 0;
+    margin-bottom: 6px;
   }
 
   .why-lovyn__title {
-    margin-bottom: 18px;
-    font-size: 26px;
+    font-size: 28px;
+    line-height: 1.2;
   }
 
   .why-lovyn__grid {
@@ -1129,6 +1136,7 @@ main {
   .why-lovyn-card {
     min-height: auto;
     padding: 18px;
+    overflow-wrap: break-word;
   }
 
   .lovyn-story__inner {
@@ -1136,8 +1144,8 @@ main {
   }
 
   .lovyn-story__copy h2 {
-    margin-bottom: 12px;
-    font-size: 26px;
+    margin-bottom: 24px;
+    font-size: 28px;
   }
 
   .lovyn-story__copy p {
