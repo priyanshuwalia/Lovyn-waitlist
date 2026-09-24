@@ -276,6 +276,10 @@ export function createApp(options: CreateAppOptions = {}) {
   return app;
 }
 
+const app = createApp();
+
+export default app;
+
 async function updateEmailDeliveryState(
   participantId: string,
   submission: WaitlistSubmission,
