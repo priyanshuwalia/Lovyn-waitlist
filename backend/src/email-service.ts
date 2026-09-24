@@ -1,5 +1,5 @@
-import type { AppConfig } from "./config";
-import type { WaitlistSubmission } from "./waitlist-contract";
+import type { AppConfig } from "./config.js";
+import type { WaitlistSubmission } from "./waitlist-contract.js";
 
 export type EmailDeliveryResult =
   | {

@@ -4,15 +4,15 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { config } from "./config";
-import { createWaitlistEmailService, type WaitlistEmailService } from "./email-service";
-import { prisma } from "./prisma";
+import { config } from "./config.js";
+import { createWaitlistEmailService, type WaitlistEmailService } from "./email-service.js";
+import { prisma } from "./prisma.js";
 import {
   adminParticipantsQuerySchema,
   seekingOptionLabels,
   waitlistSubmissionSchema,
   type WaitlistSubmission,
-} from "./waitlist-contract";
+} from "./waitlist-contract.js";
 
 type AdminIdentity = NonNullable<typeof config.admin>["user"];
 type AdminRequest = Request & { admin: AdminIdentity };
@@ -275,10 +275,6 @@ export function createApp(options: CreateAppOptions = {}) {
 
   return app;
 }
-
-const app = createApp();
-
-export default app;
 
 async function updateEmailDeliveryState(
   participantId: string,
