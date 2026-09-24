@@ -1,34 +1,38 @@
-import { createApp } from "./src/app";
-import { config } from "./src/config";
-import { closeDatabaseConnections } from "./src/prisma";
+import { createApp } from "./src/app.js";
+import { config } from "./src/config.js";
+import { closeDatabaseConnections } from "./src/prisma.js";
 
 const app = createApp();
 
-const server = app.listen(config.port, () => {
-  console.log(`Lovyn waitlist API listening on port ${config.port}`);
-});
+export default app;
 
-for (const signal of ["SIGINT", "SIGTERM"] as const) {
-  process.on(signal, () => {
-    shutdown(signal);
+if (!process.env.VERCEL) {
+  const server = app.listen(config.port, () => {
+    console.log(`Lovyn waitlist API listening on port ${config.port}`);
   });
-}
 
-function shutdown(signal: NodeJS.Signals) {
-  console.log(`Received ${signal}. Shutting down.`);
+  for (const signal of ["SIGINT", "SIGTERM"] as const) {
+    process.on(signal, () => {
+      shutdown(signal);
+    });
+  }
 
-  server.close(async error => {
-    if (error) {
-      console.error("HTTP server shutdown failed.", error);
-      process.exit(1);
-    }
+  function shutdown(signal: NodeJS.Signals) {
+    console.log(`Received ${signal}. Shutting down.`);
 
-    try {
-      await closeDatabaseConnections();
-      process.exit(0);
-    } catch (databaseError) {
-      console.error("Database shutdown failed.", databaseError);
-      process.exit(1);
-    }
-  });
+    server.close(async error => {
+      if (error) {
+        console.error("HTTP server shutdown failed.", error);
+        process.exit(1);
+      }
+
+      try {
+        await closeDatabaseConnections();
+        process.exit(0);
+      } catch (databaseError) {
+        console.error("Database shutdown failed.", databaseError);
+        process.exit(1);
+      }
+    });
+  }
 }
