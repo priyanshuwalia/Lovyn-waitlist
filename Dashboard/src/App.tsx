@@ -343,8 +343,7 @@ function formatDate(value: string) {
 }
 
 function getApiBaseUrl() {
-  const configuredBaseUrl = typeof process !== "undefined" ? process.env.BUN_PUBLIC_API_BASE_URL : undefined;
-  return (configuredBaseUrl || "http://localhost:4000").replace(/\/$/, "");
+  return (process.env.BUN_PUBLIC_API_BASE_URL || "http://localhost:4000").replace(/\/$/, "");
 }
 
 export default App;
