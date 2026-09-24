@@ -2,31 +2,9 @@ import { serve } from "bun";
 import index from "./index.html";
 
 const server = serve({
+  port: readPort(3001),
   routes: {
-    // Serve index.html for all unmatched routes.
     "/*": index,
-
-    "/api/hello": {
-      async GET(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
-      },
-      async PUT(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
-      },
-    },
-
-    "/api/hello/:name": async req => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
-      });
-    },
   },
 
   development: process.env.NODE_ENV !== "production" && {
@@ -39,3 +17,17 @@ const server = serve({
 });
 
 console.log(`🚀 Server running at ${server.url}`);
+
+function readPort(defaultPort: number) {
+  const value = process.env.PORT;
+  if (!value) {
+    return defaultPort;
+  }
+
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`Invalid PORT value: ${value}`);
+  }
+
+  return port;
+}

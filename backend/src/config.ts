@@ -43,12 +43,9 @@ const envSchema = z.object({
   ADMIN_NAME: optionalTrimmedString,
   ADMIN_EMAIL: optionalEmail,
 
-  SMTP_HOST: optionalTrimmedString,
-  SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional(),
-  SMTP_SECURE: booleanFromEnv.optional(),
-  SMTP_USER: optionalTrimmedString,
-  SMTP_PASS: optionalTrimmedString,
-  EMAIL_FROM: optionalTrimmedString,
+  BREVO_API_KEY: optionalTrimmedString,
+  BREVO_SENDER_EMAIL: optionalEmail,
+  BREVO_SENDER_NAME: optionalTrimmedString,
 
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1000).default(15 * 60 * 1000),
   WAITLIST_RATE_LIMIT_MAX: z.coerce.number().int().min(1).default(5),
@@ -64,8 +61,8 @@ if (!parsedEnv.success) {
 
 const env = parsedEnv.data;
 const isProduction = env.NODE_ENV === "production";
-const hasPartialSmtpConfig = Boolean(env.SMTP_HOST || env.SMTP_PORT || env.SMTP_USER || env.SMTP_PASS || env.EMAIL_FROM);
-const emailDeliveryEnabled = isProduction || hasPartialSmtpConfig;
+const hasPartialBrevoConfig = Boolean(env.BREVO_API_KEY || env.BREVO_SENDER_EMAIL || env.BREVO_SENDER_NAME);
+const emailDeliveryEnabled = isProduction || hasPartialBrevoConfig;
 
 const configurationErrors: string[] = [];
 
@@ -80,16 +77,12 @@ if (isProduction) {
 }
 
 if (emailDeliveryEnabled) {
-  if (!env.SMTP_HOST) {
-    configurationErrors.push("SMTP_HOST is required when email delivery is enabled.");
+  if (!env.BREVO_API_KEY) {
+    configurationErrors.push("BREVO_API_KEY is required when email delivery is enabled.");
   }
 
-  if (!env.EMAIL_FROM) {
-    configurationErrors.push("EMAIL_FROM is required when email delivery is enabled.");
-  }
-
-  if (Boolean(env.SMTP_USER) !== Boolean(env.SMTP_PASS)) {
-    configurationErrors.push("SMTP_USER and SMTP_PASS must be configured together.");
+  if (!env.BREVO_SENDER_EMAIL) {
+    configurationErrors.push("BREVO_SENDER_EMAIL is required when email delivery is enabled.");
   }
 }
 
@@ -124,14 +117,11 @@ export const config = {
   email: emailDeliveryEnabled
     ? {
         enabled: true as const,
-        smtp: {
-          host: env.SMTP_HOST!,
-          port: env.SMTP_PORT ?? 587,
-          secure: env.SMTP_SECURE ?? env.SMTP_PORT === 465,
-          user: env.SMTP_USER,
-          pass: env.SMTP_PASS,
+        brevo: {
+          apiKey: env.BREVO_API_KEY!,
+          senderEmail: env.BREVO_SENDER_EMAIL!,
+          senderName: env.BREVO_SENDER_NAME ?? "Lovyn",
         },
-        from: env.EMAIL_FROM!,
       }
     : {
         enabled: false as const,

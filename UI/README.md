@@ -17,7 +17,7 @@ cp .env.example .env
 bun run dev
 ```
 
-The UI listens on `http://localhost:3000` by default.
+The UI listens on `http://localhost:3000` by default. Set `PORT` to override it.
 
 ## Verification
 

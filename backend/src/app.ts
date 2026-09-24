@@ -16,6 +16,7 @@ import {
 
 type AdminIdentity = NonNullable<typeof config.admin>["user"];
 type AdminRequest = Request & { admin: AdminIdentity };
+type EmailDeliveryState = "SENT" | "SKIPPED" | "FAILED";
 
 type CreateAppOptions = {
   emailService?: WaitlistEmailService;
@@ -157,12 +158,13 @@ export function createApp(options: CreateAppOptions = {}) {
         return;
       }
 
-      await updateEmailDeliveryState(participant.id, submission, emailService);
+      const confirmationEmailStatus = await updateEmailDeliveryState(participant.id, submission, emailService);
 
       response.status(201).json({
         data: {
           id: participant.id,
           status: "registered",
+          confirmationEmailStatus,
         },
       });
     }),
@@ -227,6 +229,44 @@ export function createApp(options: CreateAppOptions = {}) {
     }),
   );
 
+  app.post(
+    "/api/admin/waitlist-participants/:participantId/resend-confirmation",
+    adminLimiter,
+    requireAdmin,
+    asyncHandler(async (request, response) => {
+      const params = z
+        .object({
+          participantId: z.string().uuid(),
+        })
+        .parse(request.params);
+
+      const participant = await prisma.waitlistParticipant.findUnique({
+        where: {
+          id: params.participantId,
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          seeking: true,
+        },
+      });
+
+      if (!participant) {
+        throw new HttpError(404, "participant_not_found", "Waitlist participant was not found.");
+      }
+
+      const confirmationEmailStatus = await updateEmailDeliveryState(participant.id, participant, emailService);
+
+      response.json({
+        data: {
+          id: participant.id,
+          confirmationEmailStatus,
+        },
+      });
+    }),
+  );
+
   app.use((_request, _response, next) => {
     next(new HttpError(404, "not_found", "Route not found."));
   });
@@ -240,7 +280,7 @@ async function updateEmailDeliveryState(
   participantId: string,
   submission: WaitlistSubmission,
   emailService: WaitlistEmailService,
-) {
+): Promise<EmailDeliveryState> {
   try {
     const deliveryResult = await emailService.sendWaitlistConfirmation(submission);
 
@@ -257,9 +297,12 @@ async function updateEmailDeliveryState(
             }
           : {
               confirmationEmailStatus: "SKIPPED",
+              confirmationEmailSentAt: null,
               confirmationEmailFailure: deliveryResult.reason,
             },
     });
+
+    return deliveryResult.status;
   } catch (error) {
     console.error("Waitlist confirmation email failed.", {
       participantId,
@@ -272,9 +315,12 @@ async function updateEmailDeliveryState(
       },
       data: {
         confirmationEmailStatus: "FAILED",
+        confirmationEmailSentAt: null,
         confirmationEmailFailure: truncate(getErrorMessage(error), 512),
       },
     });
+
+    return "FAILED";
   }
 }
 

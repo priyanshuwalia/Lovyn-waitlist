@@ -1,4 +1,3 @@
-import * as nodemailer from "nodemailer";
 import type { AppConfig } from "./config";
 import type { WaitlistSubmission } from "./waitlist-contract";
 
@@ -20,47 +19,44 @@ class DisabledEmailService implements WaitlistEmailService {
   async sendWaitlistConfirmation(): Promise<EmailDeliveryResult> {
     return {
       status: "SKIPPED",
-      reason: "Email delivery is disabled for this environment.",
+      reason: "Brevo email delivery is disabled for this environment.",
     };
   }
 }
 
-class SmtpWaitlistEmailService implements WaitlistEmailService {
-  private readonly transporter: nodemailer.Transporter;
+class BrevoWaitlistEmailService implements WaitlistEmailService {
+  private static readonly apiUrl = "https://api.brevo.com/v3/smtp/email";
 
-  constructor(private readonly emailConfig: Extract<AppConfig["email"], { enabled: true }>) {
-    this.transporter = nodemailer.createTransport({
-      host: emailConfig.smtp.host,
-      port: emailConfig.smtp.port,
-      secure: emailConfig.smtp.secure,
-      auth:
-        emailConfig.smtp.user && emailConfig.smtp.pass
-          ? {
-              user: emailConfig.smtp.user,
-              pass: emailConfig.smtp.pass,
-            }
-          : undefined,
-    });
-  }
+  constructor(private readonly emailConfig: Extract<AppConfig["email"], { enabled: true }>) {}
 
   async sendWaitlistConfirmation(participant: WaitlistSubmission): Promise<EmailDeliveryResult> {
-    await this.transporter.sendMail({
-      from: this.emailConfig.from,
-      to: participant.email,
-      subject: "You're on the Lovyn waitlist",
-      text: [
-        `Hi ${participant.fullName},`,
-        "",
-        "Thank you for joining the Lovyn waitlist. We received your request and will keep you posted as access opens.",
-        "",
-        "Lovyn",
-      ].join("\n"),
-      html: [
-        `<p>Hi ${escapeHtml(participant.fullName)},</p>`,
-        "<p>Thank you for joining the Lovyn waitlist. We received your request and will keep you posted as access opens.</p>",
-        "<p>Lovyn</p>",
-      ].join(""),
+    const response = await fetch(BrevoWaitlistEmailService.apiUrl, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "api-key": this.emailConfig.brevo.apiKey,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: {
+          email: this.emailConfig.brevo.senderEmail,
+          name: this.emailConfig.brevo.senderName,
+        },
+        to: [
+          {
+            email: participant.email,
+            name: participant.fullName,
+          },
+        ],
+        subject: "You're on the Lovyn waitlist",
+        textContent: createTextEmail(participant),
+        htmlContent: createHtmlEmail(participant),
+      }),
     });
+
+    if (!response.ok) {
+      throw new Error(`Brevo rejected the confirmation email: ${await readBrevoError(response)}`);
+    }
 
     return {
       status: "SENT",
@@ -74,7 +70,41 @@ export function createWaitlistEmailService(config: AppConfig): WaitlistEmailServ
     return new DisabledEmailService();
   }
 
-  return new SmtpWaitlistEmailService(config.email);
+  return new BrevoWaitlistEmailService(config.email);
+}
+
+function createTextEmail(participant: WaitlistSubmission) {
+  return [
+    `Hi ${participant.fullName},`,
+    "",
+    "Thank you for joining the Lovyn waitlist. We received your request and will keep you posted as access opens.",
+    "",
+    "Lovyn",
+  ].join("\n");
+}
+
+function createHtmlEmail(participant: WaitlistSubmission) {
+  return [
+    `<p>Hi ${escapeHtml(participant.fullName)},</p>`,
+    "<p>Thank you for joining the Lovyn waitlist. We received your request and will keep you posted as access opens.</p>",
+    "<p>Lovyn</p>",
+  ].join("");
+}
+
+async function readBrevoError(response: Response) {
+  const fallback = `${response.status} ${response.statusText}`.trim();
+
+  try {
+    const body = (await response.json()) as unknown;
+
+    if (body && typeof body === "object" && "message" in body && typeof body.message === "string") {
+      return body.message;
+    }
+
+    return fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function escapeHtml(value: string) {
